@@ -2,12 +2,14 @@
 #include <stdlib.h>
 #include "kernel.h"
 #include "osinfo.h"
+#include "uptime.h"
 
 #define BUFFER_SIZE 256
 
 int main(void) {
     char os_buf[BUFFER_SIZE];
     char kernel_buf[BUFFER_SIZE];
+    char uptime_buf[BUFFER_SIZE];
 
     printf("Arch Linux System Information Fetcher\n");
     printf("-------------------------------------\n");
@@ -24,6 +26,13 @@ int main(void) {
         fprintf(stderr, "Error: Could not read kernel version\n");
         return EXIT_FAILURE;
     }
+
+    if (get_uptime(uptime_buf, sizeof(uptime_buf)) == 0) {
+        printf("Uptime: %s\n", uptime_buf);
+    } else {
+        printf("Uptime: Unknown\n");
+    }
+
 
     return EXIT_SUCCESS;
 }
