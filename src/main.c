@@ -9,9 +9,11 @@
 #include "cpu.h"
 #include "colors.h"
 #include "packages.h"
+#include "shell.h"
+#include "wm.h"
 
 #define BUFFER_SIZE 256
-#define INFO_COUNT 6
+#define INFO_COUNT 8
 
 typedef struct {
     const char *key;
@@ -37,6 +39,8 @@ int main(void) {
         {"Kernel", "Unknown"},
         {"Uptime", "Unknown"},
         {"Packages", "Unknown"},
+        {"Shell", "Unknown"},
+        {"WM/DE", "Unknown"},
         {"Memory", "Unknown"},
         {"CPU", "Unknown"},
     };
@@ -45,8 +49,10 @@ int main(void) {
     get_kernel_version(info[1].value, BUFFER_SIZE);
     get_uptime(info[2].value, BUFFER_SIZE);
     get_package_count(info[3].value, BUFFER_SIZE);
-    get_memory_info(info[4].value, BUFFER_SIZE);
-    get_cpu_info(info[5].value, BUFFER_SIZE);
+    get_shell_info(info[4].value, BUFFER_SIZE),
+    get_wm_info(info[5].value, BUFFER_SIZE),
+    get_memory_info(info[6].value, BUFFER_SIZE);
+    get_cpu_info(info[7].value, BUFFER_SIZE);
 
     size_t max_key_len = 0;
     for (int i = 0; i < INFO_COUNT; i++) {
@@ -68,7 +74,7 @@ int main(void) {
     putchar('\n');
 
     for (int i = 0; i < INFO_COUNT; i++) {
-        const char *logo_line = (i + 2 < (int)LOGO_LINES ? logo[i + 2] : "                  ");
+        const char *logo_line = (i + 2 < (int)LOGO_LINES ? logo[i + 2] : "                ");
         printf("%s " COLOR_CYAN "%-*s" COLOR_RESET " : %s\n", logo_line, (int)max_key_len, info[i].key, info[i].value);
     }
 
