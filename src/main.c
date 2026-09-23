@@ -1,5 +1,7 @@
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "kernel.h"
 #include "osinfo.h"
 #include "uptime.h"
@@ -9,30 +11,72 @@
 #include "packages.h"
 
 #define BUFFER_SIZE 256
+#define INFO_COUNT 6
+
+typedef struct {
+    const char *key;
+    char value[BUFFER_SIZE];
+} InfoItem;
+
+static const char *logo[] = {
+    COLOR_CYAN "       /\\       " COLOR_RESET,
+    COLOR_CYAN "      /  \\      " COLOR_RESET,
+    COLOR_CYAN "     /\\   \\     " COLOR_RESET,
+    COLOR_CYAN "    /      \\    " COLOR_RESET,
+    COLOR_CYAN "   /   ,,   \\   " COLOR_RESET,
+    COLOR_CYAN "  /   |  |  -\\  " COLOR_RESET,
+    COLOR_CYAN " /_-''    ''-_\\ " COLOR_RESET,
+    COLOR_CYAN "                " COLOR_RESET
+};
+
+#define LOGO_LINES (sizeof(logo) / sizeof(logo[0]))
 
 int main(void) {
-    char os_buf[BUFFER_SIZE] = "Unknown";
-    char kernel_buf[BUFFER_SIZE] = "Unknown";
-    char uptime_buf[BUFFER_SIZE] = "Unknown";
-    char mem_buf[BUFFER_SIZE] = "Unknown";
-    char cpu_buf[BUFFER_SIZE] = "Unknown";
-    char pkgs_buf[BUFFER_SIZE] = "Unknown";
+    InfoItem info[INFO_COUNT] = {
+        {"OS", "Unknown"},
+        {"Kernel", "Unknown"},
+        {"Uptime", "Unknown"},
+        {"Packages", "Unknown"},
+        {"Memory", "Unknown"},
+        {"CPU", "Unknown"},
+    };
 
-    get_os_name(os_buf, sizeof(os_buf));
-    get_kernel_version(kernel_buf, sizeof(kernel_buf));
-    get_uptime(uptime_buf, sizeof(uptime_buf));
-    get_memory_info(mem_buf, sizeof(mem_buf));
-    get_cpu_info(cpu_buf, sizeof(cpu_buf));
-    get_package_count(pkgs_buf, sizeof(pkgs_buf));
+    get_os_name(info[0].value, BUFFER_SIZE);
+    get_kernel_version(info[1].value, BUFFER_SIZE);
+    get_uptime(info[2].value, BUFFER_SIZE);
+    get_package_count(info[3].value, BUFFER_SIZE);
+    get_memory_info(info[4].value, BUFFER_SIZE);
+    get_cpu_info(info[5].value, BUFFER_SIZE);
 
-    printf(COLOR_CYAN "       /\\         " COLOR_CYAN "%s" COLOR_RESET "@" COLOR_CYAN "archlinux\n" COLOR_RESET, getenv("USER") ? getenv("USER") : "user");
-    printf(COLOR_CYAN "      /  \\        " COLOR_RESET "-------------------\n");
-    printf(COLOR_CYAN "     / /\\ \\       " COLOR_CYAN "OS:       " COLOR_RESET "%s\n", os_buf);
-    printf(COLOR_CYAN "    / /  \\ \\      " COLOR_CYAN "Kernel:   " COLOR_RESET "%s\n", kernel_buf);
-    printf(COLOR_CYAN "   / /  __\\ \\     " COLOR_CYAN "Uptime:   " COLOR_RESET "%s\n", uptime_buf);
-    printf(COLOR_CYAN "  / /  /  /  \\    " COLOR_CYAN "Packages: " COLOR_RESET "%s\n", pkgs_buf);
-    printf(COLOR_CYAN " / /__/  /____\\   " COLOR_CYAN "Memory:   " COLOR_RESET "%s\n", mem_buf);
-    printf(COLOR_CYAN "/________/_____\\  " COLOR_CYAN "CPU:      " COLOR_RESET "%s\n", cpu_buf);
+    size_t max_key_len = 0;
+    for (int i = 0; i < INFO_COUNT; i++) {
+        size_t len = strlen(info[i].key);
+        if (len > max_key_len) {
+            max_key_len = len;
+        }
+    }
+
+    const char *user = getenv("USER") ? getenv("USER") : "user";
+
+    printf("%s " COLOR_CYAN "%s" COLOR_RESET "@" COLOR_CYAN "archlinux\n" COLOR_RESET, logo[0], user);
+
+    size_t user_host_len = strlen(user) + 10;
+    printf("%s ", logo[1]);
+    for (size_t i = 0; i < user_host_len; i++) {
+        putchar('-');
+    }
+    putchar('\n');
+
+    for (int i = 0; i < INFO_COUNT; i++) {
+        const char *logo_line = (i + 2 < (int)LOGO_LINES ? logo[i + 2] : "                  ");
+        printf("%s " COLOR_CYAN "%-*s" COLOR_RESET " : %s\n", logo_line, (int)max_key_len, info[i].key, info[i].value);
+    }
+
+    printf("%s \n", logo[7]);
+    printf("                 "
+            BG_BLACK "   " BG_RED "   " BG_GREEN "   "
+            BG_YELLOW "   " BG_BLUE "   " BG_MAGENTA "   "
+        BG_CYAN "   " BG_WHITE "   " COLOR_RESET "\n\n");
 
     return EXIT_SUCCESS;
 }
