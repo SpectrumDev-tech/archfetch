@@ -1,4 +1,5 @@
 #include "kernel.h"
+#include "utils.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
@@ -15,10 +16,6 @@ int get_kernel_version(char *buffer, size_t size) {
     }
 
     fclose(file);
-    size_t len = strlen(buffer);
-    if (len > 0 && buffer[len -1] == '\n') {
-        buffer[len - 1] = '\0';
-    }
-
+    trim_newline(buffer);
     return 0;
 }
