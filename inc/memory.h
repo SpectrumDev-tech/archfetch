@@ -3,6 +3,6 @@
 
 #include <stddef.h>
 
-int get_memory_info(char *buffer, size_t size);
+int get_memory_info(char *buffer, size_t size, const char *unit);
 
 #endif // MEMORY_H
